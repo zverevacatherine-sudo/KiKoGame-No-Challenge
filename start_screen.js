@@ -223,7 +223,7 @@ class RulesScreen {
         const rulePaths = [];
 
         // This condition uses only nine adapted rule images.
-        for (let i = 1; i <= 9; i++) {
+        for (let i = 1; i <= 12; i++) {
             rulePaths.push(`PICS/Rules/Rules/Ru${i}.png`);
         }
 
