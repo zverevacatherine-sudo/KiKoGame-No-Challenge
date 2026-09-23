@@ -84,37 +84,8 @@ class Game {
         this.eventsManager =
             new EventsManager();
 
-        // Start background music when browser permits.
-        this.soundManager
-            .playMusic()
-            .catch(() => {
-                const startMusicOnInteraction =
-                    () => {
-                        this.soundManager.playMusic();
-
-                        document.removeEventListener(
-                            "click",
-                            startMusicOnInteraction
-                        );
-
-                        document.removeEventListener(
-                            "keydown",
-                            startMusicOnInteraction
-                        );
-                    };
-
-                document.addEventListener(
-                    "click",
-                    startMusicOnInteraction,
-                    { once: true }
-                );
-
-                document.addEventListener(
-                    "keydown",
-                    startMusicOnInteraction,
-                    { once: true }
-                );
-            });
+        // Background music does not start on page load or during the Pre Study.
+        // It starts only when Assessment Rules are opened.
 
         // Entities retained in this condition
         this.departments = [];
@@ -240,12 +211,15 @@ class Game {
 
             if (action === "prestudy") {
                 this.prestudy_screen.open();
-                this.soundManager.pauseMusic();
                 this.state = "prestudy";
             } else if (
                 action === "rules"
             ) {
                 this.rules_screen.open();
+
+                // Start music only when the participant opens Assessment Rules.
+                this.soundManager.playMusic().catch(() => {});
+
                 this.state = "rules";
             } else if (
                 action === "start"
@@ -273,12 +247,21 @@ class Game {
                 this.prestudy_completed =
                     true;
 
+                // Return silently to the menu.
+                // Music starts only after Assessment Rules is opened.
                 this.state = "menu";
-                this.soundManager.resumeMusic();
             } else if (
-                result === "failed"
+                result === "attention_failed"
             ) {
-                this.terminateParticipant();
+                this.terminateParticipant(
+                    "C1F917Z4"
+                );
+            } else if (
+                result === "content_failed"
+            ) {
+                this.terminateParticipant(
+                    "CT8ALQ35"
+                );
             }
 
             return;
@@ -387,7 +370,9 @@ class Game {
                 result ===
                 "attention_failed"
             ) {
-                this.terminateParticipant();
+                this.terminateParticipant(
+                    "C1F917Z4"
+                );
                 return;
             }
 
@@ -506,10 +491,14 @@ class Game {
     }
 
 
-    terminateParticipant() {
+    terminateParticipant(prolificCode = "C1F917Z4") {
         this.eventsManager.pause_timers();
         this.soundManager.pauseMusic();
         this.test_screen.close_quiz();
+
+        this.termination_screen.set_code(
+            prolificCode
+        );
 
         this.paused = false;
         this.pause_show_rules = false;

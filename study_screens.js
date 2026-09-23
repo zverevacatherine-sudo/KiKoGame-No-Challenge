@@ -84,10 +84,18 @@ class PreStudyScreen {
             this.question_index += 1;
 
             if (this.question_index >= this.questions.length) {
-                // Fail if all 3 content questions are wrong
-                // OR if the attention check is failed.
-                if (this.content_correct === 0 || !this.attention_passed) {
-                    return "failed";
+                // Two separate exclusion conditions:
+                // 1) Failed attention check -> C1F917Z4
+                // 2) All three content questions wrong -> CT8ALQ35
+                //
+                // If both happen at the same time, the attention-check
+                // failure takes priority.
+                if (!this.attention_passed) {
+                    return "attention_failed";
+                }
+
+                if (this.content_correct === 0) {
+                    return "content_failed";
                 }
 
                 return "passed";
@@ -116,7 +124,6 @@ class PreStudyScreen {
         );
 
         this.ctx.font = "28px Comicsansms, Arial";
-
         const questionLines = this._wrapText(
             current.question,
             1080,
@@ -148,9 +155,7 @@ class PreStudyScreen {
 
             this.answer_rects.push(rect);
 
-            // White answer box
             this.ctx.fillStyle = "white";
-
             this._drawRoundedRect(
                 rect.x,
                 rect.y,
@@ -158,13 +163,10 @@ class PreStudyScreen {
                 rect.height,
                 12
             );
-
             this.ctx.fill();
 
-            // Border
             this.ctx.strokeStyle = "rgb(200, 200, 200)";
             this.ctx.lineWidth = 1;
-
             this._drawRoundedRect(
                 rect.x,
                 rect.y,
@@ -172,10 +174,8 @@ class PreStudyScreen {
                 rect.height,
                 12
             );
-
             this.ctx.stroke();
 
-            // Answer text
             const answerLines = this._wrapText(
                 answer,
                 1010,
@@ -189,12 +189,8 @@ class PreStudyScreen {
 
             const lineHeight = 24;
             const totalHeight = answerLines.length * lineHeight;
-
             const firstBaseline =
-                rect.y +
-                rect.height / 2 -
-                totalHeight / 2 +
-                18;
+                rect.y + rect.height / 2 - totalHeight / 2 + 18;
 
             answerLines.forEach((line, lineIndex) => {
                 this.ctx.fillText(
@@ -214,15 +210,9 @@ class PreStudyScreen {
         this.ctx.font = font;
 
         for (const word of words) {
-            const candidate =
-                current
-                    ? `${current} ${word}`
-                    : word;
+            const candidate = current ? `${current} ${word}` : word;
 
-            if (
-                this.ctx.measureText(candidate).width <=
-                maxWidth
-            ) {
+            if (this.ctx.measureText(candidate).width <= maxWidth) {
                 current = candidate;
             } else {
                 if (current) {
@@ -237,107 +227,63 @@ class PreStudyScreen {
             }
         }
 
-        if (
-            current &&
-            lines.length < maxLines
-        ) {
+        if (current && lines.length < maxLines) {
             lines.push(current);
         }
 
+        // If the text was truncated, append an ellipsis safely.
         const combined = lines.join(" ");
-
-        if (
-            combined.length < text.length &&
-            lines.length > 0
-        ) {
-            const last =
-                lines.length - 1;
-
-            let shortened =
-                lines[last];
+        if (combined.length < text.length && lines.length > 0) {
+            let last = lines.length - 1;
+            let shortened = lines[last];
 
             while (
                 shortened.length > 0 &&
-                this.ctx.measureText(
-                    `${shortened}...`
-                ).width > maxWidth
+                this.ctx.measureText(`${shortened}...`).width > maxWidth
             ) {
-                shortened =
-                    shortened.slice(
-                        0,
-                        -1
-                    ).trim();
+                shortened = shortened.slice(0, -1).trim();
             }
 
-            lines[last] =
-                `${shortened}...`;
+            lines[last] = `${shortened}...`;
         }
 
         return lines;
     }
 
-    _drawRoundedRect(
-        x,
-        y,
-        width,
-        height,
-        radius
-    ) {
+    _drawRoundedRect(x, y, width, height, radius) {
         this.ctx.beginPath();
-
-        this.ctx.moveTo(
-            x + radius,
-            y
-        );
-
-        this.ctx.lineTo(
-            x + width - radius,
-            y
-        );
-
+        this.ctx.moveTo(x + radius, y);
+        this.ctx.lineTo(x + width - radius, y);
         this.ctx.quadraticCurveTo(
             x + width,
             y,
             x + width,
             y + radius
         );
-
         this.ctx.lineTo(
             x + width,
             y + height - radius
         );
-
         this.ctx.quadraticCurveTo(
             x + width,
             y + height,
             x + width - radius,
             y + height
         );
-
-        this.ctx.lineTo(
-            x + radius,
-            y + height
-        );
-
+        this.ctx.lineTo(x + radius, y + height);
         this.ctx.quadraticCurveTo(
             x,
             y + height,
             x,
             y + height - radius
         );
-
-        this.ctx.lineTo(
-            x,
-            y + radius
-        );
-
+        this.ctx.lineTo(x, y + radius);
         this.ctx.quadraticCurveTo(
             x,
             y,
             x + radius,
             y
         );
-
         this.ctx.closePath();
     }
 }
@@ -349,39 +295,32 @@ class TerminationScreen {
         this.prolific_code = "C1F917Z4";
     }
 
+    set_code(code) {
+        this.prolific_code = code;
+    }
+
     draw() {
         this.ctx.fillStyle = "rgba(0, 0, 0, 0.86)";
-        this.ctx.fillRect(
-            0,
-            0,
-            CONFIG.WIDTH,
-            CONFIG.HEIGHT
-        );
+        this.ctx.fillRect(0, 0, CONFIG.WIDTH, CONFIG.HEIGHT);
 
         this.ctx.fillStyle = "white";
         this.ctx.textAlign = "center";
 
-        this.ctx.font =
-            "38px Comicsansms, Arial";
-
+        this.ctx.font = "38px Comicsansms, Arial";
         this.ctx.fillText(
             "Thank you for the participation.",
             CONFIG.WIDTH / 2,
             275
         );
 
-        this.ctx.font =
-            "28px Comicsansms, Arial";
-
+        this.ctx.font = "28px Comicsansms, Arial";
         this.ctx.fillText(
             "You may now go back to Prolific and enter the code",
             CONFIG.WIDTH / 2,
             345
         );
 
-        this.ctx.font =
-            "bold 44px Comicsansms, Arial";
-
+        this.ctx.font = "bold 44px Comicsansms, Arial";
         this.ctx.fillText(
             this.prolific_code,
             CONFIG.WIDTH / 2,
