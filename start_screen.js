@@ -1,22 +1,32 @@
 // StartScreen and RulesScreen classes
+
 class StartScreen {
     constructor(ctx) {
         this.ctx = ctx;
         this.logo = null;
         this.logoLoaded = false;
-        this.btn_w = 560;
-        this.btn_h = 110;
 
+        this.btn_w = 560;
+        this.btn_h = 90;
+
+        // Keep the familiar KiKoGame order, while adding Pre Study as step 1.
         this.btn_start = {
             x: CONFIG.WIDTH / 2 - this.btn_w / 2,
-            y: CONFIG.HEIGHT / 2 - 15,
+            y: 325,
             width: this.btn_w,
             height: this.btn_h
         };
 
         this.btn_rules = {
             x: CONFIG.WIDTH / 2 - this.btn_w / 2,
-            y: CONFIG.HEIGHT / 2 + 120,
+            y: 435,
+            width: this.btn_w,
+            height: this.btn_h
+        };
+
+        this.btn_prestudy = {
+            x: CONFIG.WIDTH / 2 - this.btn_w / 2,
+            y: 545,
             width: this.btn_w,
             height: this.btn_h
         };
@@ -34,12 +44,10 @@ class StartScreen {
         });
     }
 
-    draw(start_allowed) {
-        // Dark overlay
+    draw(prestudy_completed, rules_completed) {
         this.ctx.fillStyle = "rgba(0, 0, 0, 0.59)";
         this.ctx.fillRect(0, 0, CONFIG.WIDTH, CONFIG.HEIGHT);
 
-        // Draw logo
         if (this.logoLoaded) {
             this.ctx.drawImage(
                 this.logo,
@@ -48,83 +56,55 @@ class StartScreen {
             );
         }
 
-        // Start button
-        if (start_allowed) {
-            this.ctx.fillStyle = "rgb(39, 44, 78)";
-            this._drawRoundedRect(
-                this.btn_start.x,
-                this.btn_start.y,
-                this.btn_start.width,
-                this.btn_start.height,
-                18
-            );
-            this.ctx.fill();
+        // START is available only after Pre Study + Rules.
+        const start_allowed =
+            prestudy_completed && rules_completed;
 
-            this.ctx.strokeStyle = "white";
-            this.ctx.lineWidth = 2;
-            this._drawRoundedRect(
-                this.btn_start.x,
-                this.btn_start.y,
-                this.btn_start.width,
-                this.btn_start.height,
-                18
-            );
-            this.ctx.stroke();
+        this._drawButton(
+            this.btn_start,
+            "Start",
+            start_allowed
+                ? "rgb(39, 44, 78)"
+                : "rgb(128, 128, 128)",
+            start_allowed
+                ? "white"
+                : "rgb(96, 96, 96)"
+        );
 
-            this.ctx.fillStyle = "white";
-            this.ctx.font = "44px Comicsansms, Arial";
-            this.ctx.textAlign = "center";
-            this.ctx.fillText(
-                "Start",
-                this.btn_start.x + this.btn_start.width / 2,
-                this.btn_start.y + this.btn_start.height / 2 + 15
-            );
-        } else {
-            this.ctx.fillStyle = "rgb(128, 128, 128)";
-            this._drawRoundedRect(
-                this.btn_start.x,
-                this.btn_start.y,
-                this.btn_start.width,
-                this.btn_start.height,
-                18
-            );
-            this.ctx.fill();
+        // RULES become available only after passing the Pre Study.
+        this._drawButton(
+            this.btn_rules,
+            "Assessment rules",
+            prestudy_completed
+                ? "rgb(39, 44, 78)"
+                : "rgb(128, 128, 128)",
+            prestudy_completed
+                ? "white"
+                : "rgb(96, 96, 96)"
+        );
 
-            this.ctx.strokeStyle = "white";
-            this.ctx.lineWidth = 2;
-            this._drawRoundedRect(
-                this.btn_start.x,
-                this.btn_start.y,
-                this.btn_start.width,
-                this.btn_start.height,
-                18
-            );
-            this.ctx.stroke();
+        // PRE STUDY is the first mandatory step.
+        this._drawButton(
+            this.btn_prestudy,
+            prestudy_completed
+                ? "Pre Study completed"
+                : "Pre Study",
+            prestudy_completed
+                ? "rgb(128, 128, 128)"
+                : "rgb(39, 44, 78)",
+            prestudy_completed
+                ? "rgb(96, 96, 96)"
+                : "white"
+        );
+    }
 
-            this.ctx.fillStyle = "rgb(96, 96, 96)";
-            this.ctx.font = "44px Comicsansms, Arial";
-            this.ctx.textAlign = "center";
-            this.ctx.fillText(
-                "Start",
-                this.btn_start.x + this.btn_start.width / 2,
-                this.btn_start.y + this.btn_start.height / 2 - 5
-            );
-
-            this.ctx.font = "24px Comicsansms, Arial";
-            this.ctx.fillText(
-                "(Read the rules first)",
-                this.btn_start.x + this.btn_start.width / 2,
-                this.btn_start.y + this.btn_start.height / 2 + 30
-            );
-        }
-
-        // Assessment rules button
-        this.ctx.fillStyle = "rgb(39, 44, 78)";
+    _drawButton(rect, text, bg, fg) {
+        this.ctx.fillStyle = bg;
         this._drawRoundedRect(
-            this.btn_rules.x,
-            this.btn_rules.y,
-            this.btn_rules.width,
-            this.btn_rules.height,
+            rect.x,
+            rect.y,
+            rect.width,
+            rect.height,
             18
         );
         this.ctx.fill();
@@ -132,35 +112,50 @@ class StartScreen {
         this.ctx.strokeStyle = "white";
         this.ctx.lineWidth = 2;
         this._drawRoundedRect(
-            this.btn_rules.x,
-            this.btn_rules.y,
-            this.btn_rules.width,
-            this.btn_rules.height,
+            rect.x,
+            rect.y,
+            rect.width,
+            rect.height,
             18
         );
         this.ctx.stroke();
 
-        this.ctx.fillStyle = "white";
-        this.ctx.font = "44px Comicsansms, Arial";
+        this.ctx.fillStyle = fg;
+        this.ctx.font = "40px Comicsansms, Arial";
         this.ctx.textAlign = "center";
         this.ctx.fillText(
-            "Assessment rules",
-            this.btn_rules.x + this.btn_rules.width / 2,
-            this.btn_rules.y + this.btn_rules.height / 2 + 15
+            text,
+            rect.x + rect.width / 2,
+            rect.y + rect.height / 2 + 14
         );
     }
 
-    handle_click(x, y, start_allowed) {
-        if (pointInRect(x, y, this.btn_start)) {
-            if (start_allowed) {
-                return "start";
-            }
-
-            return null;
+    handle_click(
+        x,
+        y,
+        prestudy_completed,
+        rules_completed
+    ) {
+        if (
+            !prestudy_completed &&
+            pointInRect(x, y, this.btn_prestudy)
+        ) {
+            return "prestudy";
         }
 
-        if (pointInRect(x, y, this.btn_rules)) {
+        if (
+            prestudy_completed &&
+            pointInRect(x, y, this.btn_rules)
+        ) {
             return "rules";
+        }
+
+        if (
+            prestudy_completed &&
+            rules_completed &&
+            pointInRect(x, y, this.btn_start)
+        ) {
+            return "start";
         }
 
         return null;
@@ -212,7 +207,6 @@ class RulesScreen {
         this.rule_images = [];
         this.imagesLoaded = false;
 
-        // Same rectangular navigation button as Basic Kiko.
         this.next_rect = {
             x: CONFIG.WIDTH - 150,
             y: CONFIG.HEIGHT - 125,
@@ -222,18 +216,23 @@ class RulesScreen {
 
         const rulePaths = [];
 
-        // This condition uses only nine adapted rule images.
+        // Updated study version: Ru1.png through Ru12.png.
         for (let i = 1; i <= 12; i++) {
-            rulePaths.push(`PICS/Rules/Rules/Ru${i}.png`);
+            rulePaths.push(
+                `PICS/Rules/Rules/Ru${i}.png`
+            );
         }
 
         loadImages(rulePaths).then(images => {
             this.rule_images = images.map(img => {
-                const canvas = document.createElement("canvas");
+                const canvas =
+                    document.createElement("canvas");
+
                 canvas.width = CONFIG.WIDTH;
                 canvas.height = CONFIG.HEIGHT;
 
                 const c = canvas.getContext("2d");
+
                 c.drawImage(
                     img,
                     0,
@@ -267,7 +266,6 @@ class RulesScreen {
             0
         );
 
-        // Rectangular next button
         this.ctx.fillStyle = "rgb(39, 44, 78)";
         this._drawRoundedRect(
             this.next_rect.x,
@@ -301,7 +299,7 @@ class RulesScreen {
 
     handle_click(x, y) {
         if (pointInRect(x, y, this.next_rect)) {
-            this.index++;
+            this.index += 1;
 
             if (this.index >= this.rule_images.length) {
                 return "done";

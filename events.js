@@ -4,7 +4,7 @@ class EventsManager {
     constructor() {
         this.Department_fly_in = null;
         this.AIity_fly_in = null;
-        this.Departments_between_time_distance = 6000;
+        this.Departments_between_time_distance = 4000;
         this.AIity_delay = 3000;
         this.Total_departments = Departments.length;
     }
