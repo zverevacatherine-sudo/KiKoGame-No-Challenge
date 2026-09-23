@@ -8,7 +8,7 @@ class Scores {
         this.imagesLoaded = false;
 
         this.experience_study_url =
-            "https://qualtricsxmbx6typpy4.qualtrics.com/jfe/form/SV_0w8HiouRlacVJH0";
+            "https://qualtricsxmbx6typpy4.qualtrics.com/jfe/form/SV_3axBm9gDkmVGvSm";
 
         this.continue_study_rect = {
             x: CONFIG.WIDTH / 2 - 310,
