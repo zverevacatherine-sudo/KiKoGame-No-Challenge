@@ -1,6 +1,6 @@
 // Sound management for KiKoGame No-Challenge.
-// Keeps background music and the department click sound.
-// Challenge-related collision and healing sounds remain removed.
+// Background music starts with Assessment Rules.
+// Department click sound is replayed reliably on EVERY department click.
 
 class SoundManager {
     constructor() {
@@ -8,7 +8,6 @@ class SoundManager {
         this.clickSound = document.getElementById("clickSound");
         this.musicPaused = false;
 
-        // Prepare audio as early as possible.
         if (this.backgroundMusic) {
             this.backgroundMusic.preload = "auto";
             this.backgroundMusic.volume = 1.0;
@@ -69,16 +68,13 @@ class SoundManager {
         }
 
         try {
-            /*
-             * Use a fresh copy for every department click.
-             * This avoids problems when the same audio element is restarted
-             * quickly and makes the sound independent of background music.
-             */
-            const sound = this.clickSound.cloneNode(true);
-            sound.volume = 1.0;
-            sound.preload = "auto";
+            // Always restart the SAME preloaded audio element from the beginning.
+            // This makes the department sound work for department 1, 2, 3, 4 and 5.
+            this.clickSound.pause();
+            this.clickSound.currentTime = 0;
+            this.clickSound.volume = 1.0;
 
-            const playPromise = sound.play();
+            const playPromise = this.clickSound.play();
 
             if (playPromise !== undefined) {
                 playPromise.catch(error => {
